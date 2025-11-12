@@ -2,7 +2,7 @@ import asyncio
 from aiogram import types, F
 from aiogram.filters import Command
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-
+from aiogram.types import FSInputFile
 from config import bot, dp
 from database import create_table, get_quiz_index, update_quiz_index, get_user_score, update_user_score
 from logic import  generate_options_keyboard
@@ -11,10 +11,24 @@ from logic import get_question, new_quiz
 # Хэндлер на команду /start
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
+    photo_path = "welcome.png"
+    
     builder = ReplyKeyboardBuilder()
     builder.add(types.KeyboardButton(text="Начать игру"))
-    await message.answer("Добро пожаловать в квиз!", reply_markup=builder.as_markup(resize_keyboard=True))
-
+    # Проверяем существование файла
+    try:
+        # Отправляем фото с приветствием
+        photo = FSInputFile(photo_path)
+        await message.answer_photo(
+            photo=photo,
+            caption="Добро пожаловать в квиз!",
+            reply_markup=builder.as_markup(resize_keyboard=True)
+        )
+    except FileNotFoundError:
+        await message.answer(
+            "❌ Ошибка: файл изображения не найден!\n"
+            "Убедитесь, что файл 'image.jpg' находится в папке со скриптом."
+        )
 
 
 @dp.message(F.text == "Начать игру")
